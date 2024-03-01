@@ -23,13 +23,21 @@ Responsible for user account creation, login, read, update, and delete.
         (Return JWT AUTH TOKEN)
 
     - Read a user account with JWT access (Return user_id & user.email)
-        ~ Function to login to a user's account
+        ~ Function to fetch a user's account object
             @route POST /api/users/profile/get
             @access Public
                 headers(JWT AUTH TOKEN)
         (Return user_id & user.email)
-        
+
     - Update a user account with JWT access (Return user_id & user.email)
+        ~ Function to update a user's account
+            @route POST /api/users/profile/update
+            @access Public
+                headers(JWT AUTH TOKEN)
+                req.body(email, password)
+                      email is optional if not provided it will remain the same.
+                      password must be included in order to change the password.
+        (Return user_id & user.email)
     - Delete a user account with JWT access (Return success message)
 ---------------------------------------------
 */
@@ -108,23 +116,46 @@ exports.updateUser = async (req, res) => {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        // Check if password is being updated and hash it
-        if (req.body.password) {
-            user.password = req.body.password; // This will trigger the pre-save hook for hashing
+        let infoChanged = false;
+
+        // Check if the current password is provided for verification
+        if (req.body.currentPassword && req.body.newPassword) {
+            const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
+            if (!isMatch) {
+                // The current password does not match the stored password
+                return res.status(400).send({ message: "Current password is incorrect." });
+            }
+
+            // If the current password is correct, and the new password is different
+            if (req.body.newPassword !== req.body.currentPassword) {
+                user.password = req.body.newPassword; // Let the pre-save hook handle hashing
+                infoChanged = true;
+            } else{
+                return res.status(400).send({ message: "New password must be different than the old." });
+            }
+        } else{
+            return res.status(400).send({ message: "Please provide old password and new." });
         }
 
-        user.email = req.body.email || user.email;
-        // Add or update other fields as necessary
+        // Check if email is being updated
+        if (req.body.email && user.email !== req.body.email) {
+            user.email = req.body.email;
+            infoChanged = true;
+        }
 
-        await user.save(); // This should now trigger the pre-save hook, but we're hashing above to be certain
-
-        // Explicitly construct the response to exclude the password
-        const userResponse = _.omit(user.toObject(), ['password']);
-        res.send(userResponse);
+        if (infoChanged) {
+            await user.save(); // Save changes, triggers the pre-save hook for password hashing if it's been changed
+            const userResponse = _.omit(user.toObject(), ['password']);
+            res.send(userResponse);
+        } else {
+            // No information has been updated.
+            res.status(200).send({ message: "No information has been updated." });
+        }
     } catch (error) {
-        res.status(500).send({ message: error.message});
+        res.status(500).send({ message: error.message });
     }
 };
+
 
 
 exports.deleteUser = async (req, res) => {
