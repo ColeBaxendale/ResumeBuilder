@@ -57,7 +57,7 @@ exports.loginUser = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
@@ -73,10 +73,11 @@ exports.getUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         // Using { new: true } option to return the document after update
-        const user = await User.findByIdAndUpdate(req.params.userId, req.body, { new: true });
+        const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
+
         res.send(user);
     } catch (error) {
         res.status(500).send({ message: 'Error updating user' });
@@ -86,7 +87,7 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.userId);
+        const user = await User.findByIdAndDelete(req.user._id);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user-controller');
 const { body, validationResult } = require('express-validator');
-
+const authenticateToken = require('../middleware/authenticateToken');
 
 // User routes
 
@@ -19,9 +19,10 @@ router.post('/login', userController.loginUser); // Login route for users
 
 
 // TO DO 
-router.get('/profile/:userId', userController.getUser); // Get a user's profile
-router.put('/profile/:userId', userController.updateUser); // Update user profile
-router.delete('/profile/:userId', userController.deleteUser); // Delete a user
+// FIX PASSWORD HASH WHEN UPDATING...
+router.get('/profile/get', authenticateToken, userController.getUser); // Get a user's profile
+router.put('/profile/update', authenticateToken, userController.updateUser); // Update user profile
+router.delete('/profile/delete', authenticateToken, userController.deleteUser); // Delete a user
 
 
 module.exports = router;
