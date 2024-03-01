@@ -1,6 +1,7 @@
 const User = require('../models/user'); // Adjust the path as necessary
 const { validationResult } = require('express-validator');
-
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 exports.addUser = async (req, res) => {
     const errors = validationResult(req);
@@ -28,9 +29,31 @@ exports.addUser = async (req, res) => {
 };
 
 
-exports.loginUser = async(req,res) => {
-    console.log('loginUser Method');
-}
+exports.loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(401).send({ message: 'Invalid credentials' });
+        }
+
+        // Generate a token. Replace 'yourSecretKey' with a real secret key.
+        const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+
+        res.send({ token });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).send({ message: 'Failed to login' });
+    }
+};
 
 exports.getUser = async(req,res) => {
     console.log('getUser Method');
