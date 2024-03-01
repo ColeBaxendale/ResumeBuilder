@@ -2,7 +2,37 @@ const User = require('../models/user'); // Adjust the path as necessary
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash'); 
 
+/*
+User Account CRUD Controller: 
+Responsible for user account creation, login, read, update, and delete. 
+---------------------------------------------
+    - Create a new user account. 
+       ~ Function to create a new user account
+            @route POST /api/users/register
+            @access Public
+                req.body(email, password)
+        (Return user_id & user.email)
+
+    - Login with correct user credintals
+        ~ Function to login to a user's account
+            @route POST /api/users/login
+            @access Public
+                req.body(email, password)
+        (Return JWT AUTH TOKEN)
+
+    - Read a user account with JWT access (Return user_id & user.email)
+        ~ Function to login to a user's account
+            @route POST /api/users/profile/get
+            @access Public
+                headers(JWT AUTH TOKEN)
+        (Return user_id & user.email)
+        
+    - Update a user account with JWT access (Return user_id & user.email)
+    - Delete a user account with JWT access (Return success message)
+---------------------------------------------
+*/
 exports.addUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -70,17 +100,29 @@ exports.getUser = async (req, res) => {
 };
 
 
+
 exports.updateUser = async (req, res) => {
     try {
-        // Using { new: true } option to return the document after update
-        const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });
+        const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
 
-        res.send(user);
+        // Check if password is being updated and hash it
+        if (req.body.password) {
+            user.password = req.body.password; // This will trigger the pre-save hook for hashing
+        }
+
+        user.email = req.body.email || user.email;
+        // Add or update other fields as necessary
+
+        await user.save(); // This should now trigger the pre-save hook, but we're hashing above to be certain
+
+        // Explicitly construct the response to exclude the password
+        const userResponse = _.omit(user.toObject(), ['password']);
+        res.send(userResponse);
     } catch (error) {
-        res.status(500).send({ message: 'Error updating user' });
+        res.status(500).send({ message: error.message});
     }
 };
 
