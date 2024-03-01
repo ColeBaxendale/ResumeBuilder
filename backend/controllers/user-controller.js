@@ -34,9 +34,7 @@ Responsible for user account creation, login, read, update, and delete.
             @route POST /api/users/profile/update
             @access Public
                 headers(JWT AUTH TOKEN)
-                req.body(email, password)
-                      email is optional if not provided it will remain the same.
-                      password must be included in order to change the password.
+                req.body(currentPassword, newPassword)
         (Return user_id & user.email)
     - Delete a user account with JWT access (Return success message)
 ---------------------------------------------
@@ -136,13 +134,7 @@ exports.updateUser = async (req, res) => {
         } else{
             return res.status(400).send({ message: "Please provide old password and new." });
         }
-
-        // Check if email is being updated
-        if (req.body.email && user.email !== req.body.email) {
-            user.email = req.body.email;
-            infoChanged = true;
-        }
-
+        
         if (infoChanged) {
             await user.save(); // Save changes, triggers the pre-save hook for password hashing if it's been changed
             const userResponse = _.omit(user.toObject(), ['password']);
