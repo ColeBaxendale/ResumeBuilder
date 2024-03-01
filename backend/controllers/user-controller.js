@@ -1,4 +1,4 @@
-const User = require('../models/user'); // Adjust the path as necessary
+const User = require('../models/user'); 
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -6,8 +6,10 @@ const _ = require('lodash');
 
 /*
 User Account CRUD Controller: 
-Responsible for user account creation, login, read, update, and delete. 
+Functions in this controller are designed to handle requests from the client side.
+Each function is responsible for a specific task outlined below:
 ---------------------------------------------
++ addUser(): 
     - Create a new user account. 
        ~ Function to create a new user account
             @route POST /api/users/register
@@ -16,32 +18,67 @@ Responsible for user account creation, login, read, update, and delete.
                 @param {string} req.body.password
                 req.body(email, password)
             201 @returns(user_id & user.email) 
+            400 @returns("Please provide email and password.")
+            400 @returns(errors.array)
             409 @returns("User already exists with this email.") 
             500 @returns("Failed to register user.") 
 
-
++ loginUser(): 
     - Login with correct user credintals
         ~ Function to login to a user's account
             @route POST /api/users/login
             @access Public
+                @param {object} req.headers(JWT TOKEN)
                 req.body(email, password)
-        (Return JWT AUTH TOKEN)
+            200 @returns(JWT TOKEN) 
+            400 @returns("Please provide email and password.")
+            404 @returns("User not found") 
+            401 @returns("Invalid credentials") 
+            500 @returns("Failed to login.") 
 
++ getUser():
     - Read a user account with JWT access (Return user_id & user.email)
         ~ Function to fetch a user's account object
-            @route POST /api/users/profile/get
+            @route GET /api/users/profile/get
             @access Public
-                headers(JWT AUTH TOKEN)
-        (Return user_id & user.email)
+                @param {headers}
+                req.headers(JWT TOKEN)
+            200 @returns(User object without password) 
+            403 @returns("Unauthorized")
+            404 @returns("User not found") 
+            500 @returns("Error retrieving user") 
 
++ updateUser():
     - Update a user account with JWT access (Return user_id & user.email)
         ~ Function to update a user's account
-            @route POST /api/users/profile/update
+            @route PUT /api/users/profile/update
             @access Public
-                headers(JWT AUTH TOKEN)
+                @param {headers}
+                req.headers(JWT TOKEN)
+                @param {string} req.body.currentPassword
+                @param {string} req.body.newPassword
                 req.body(currentPassword, newPassword)
-        (Return user_id & user.email)
+            200 @returns(User object without password) 
+            400 @returns("Current password is incorrect")
+            400 @returns("New password must be different than old")
+            400 @returns("Please provide old password and new.")
+            400 @returns("Current password is incorrect")
+            403 @returns("Unauthorized")
+            404 @returns("User not found") 
+            500 @returns("Error updating user.") 
+
++ deleteUser():
     - Delete a user account with JWT access (Return success message)
+        ~ Function to delete a user's account
+            @route DELETE /api/users/profile/delete
+            @access Public
+                @param {headers}
+                req.headers(JWT TOKEN)
+            200 @returns("User deleted successfully") 
+            403 @returns("Unauthorized")
+            404 @returns("User not found") 
+            500 @returns("Error deleting user.") 
+
 ---------------------------------------------
 */
 exports.addUser = async (req, res) => {
@@ -52,6 +89,11 @@ exports.addUser = async (req, res) => {
     try {
         // Extract email and password from request body
         const { email, password } = req.body;
+
+        if(!email || !password){
+            return res.status(400).send({ message: "Please provide email and password." });
+        }
+
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -73,6 +115,11 @@ exports.addUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        if(!email || !password){
+            return res.status(400).send({ message: "Please provide email and password." });
+        }
+
         const user = await User.findOne({ email });
 
         if (!user) {
@@ -118,9 +165,6 @@ exports.updateUser = async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
-
-        let infoChanged = false;
-
         // Check if the current password is provided for verification
         if (req.body.currentPassword && req.body.newPassword) {
             const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
@@ -132,7 +176,6 @@ exports.updateUser = async (req, res) => {
             // If the current password is correct, and the new password is different
             if (req.body.newPassword !== req.body.currentPassword) {
                 user.password = req.body.newPassword; // Let the pre-save hook handle hashing
-                infoChanged = true;
             } else{
                 return res.status(400).send({ message: "New password must be different than the old." });
             }
@@ -144,12 +187,9 @@ exports.updateUser = async (req, res) => {
             await user.save(); // Save changes, triggers the pre-save hook for password hashing if it's been changed
             const userResponse = _.omit(user.toObject(), ['password']);
             res.send(userResponse);
-        } else {
-            // No information has been updated.
-            res.status(200).send({ message: "No information has been updated." });
-        }
+        } 
     } catch (error) {
-        res.status(500).send({ message: error.message });
+        res.status(500).send({ message: "Error updating user."});
     }
 };
 
