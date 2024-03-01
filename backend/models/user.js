@@ -18,8 +18,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true, // Allows for null values in the unique index
   },
-  displayName: String, // Consider storing names for a personalized experience
-  // Add other fields as necessary, such as profile pictures, etc.
+  
 });
 
 // Pre-save hook to hash the password before saving the user document, if password is present
