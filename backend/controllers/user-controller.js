@@ -4,23 +4,23 @@
 
 
 
-exports.register = async(req,res) => {
-    console.log('Register Method');
+exports.addUser = async(req,res) => {
+    console.log('addUser Method');
 }
 
-exports.login = async(req,res) => {
-    console.log('Login Method');
+exports.loginUser = async(req,res) => {
+    console.log('loginUser Method');
 }
 
-exports.forgotPassword = async(req,res) => {
-    console.log('Forgot Password Method');
+exports.getUser = async(req,res) => {
+    console.log('getUser Method');
 }
 
-exports.resetPassword = async(req,res) => {
-    console.log('Reset Password Method');
+exports.updateUser = async(req,res) => {
+    console.log('updateUser Method');
 }
 
-exports.loginWithGoogleAuth = async(req,res) => {
-    console.log('Google Auth Login Method');
+exports.deleteUser = async(req,res) => {
+    console.log('deleteUser');
 }
 
