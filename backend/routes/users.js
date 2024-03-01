@@ -14,9 +14,11 @@ router.post('/register', [
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
   ], userController.addUser);
-
-  
 router.post('/login', userController.loginUser); // Login route for users
+
+
+
+// TO DO 
 router.get('/profile/:userId', userController.getUser); // Get a user's profile
 router.put('/profile/:userId', userController.updateUser); // Update user profile
 router.delete('/profile/:userId', userController.deleteUser); // Delete a user
