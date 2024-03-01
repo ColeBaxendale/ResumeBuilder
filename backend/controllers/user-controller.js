@@ -55,15 +55,45 @@ exports.loginUser = async (req, res) => {
     }
 };
 
-exports.getUser = async(req,res) => {
-    console.log('getUser Method');
-}
+exports.getUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        // Optionally, exclude the password and other sensitive fields from the response
+        const { password, ...userWithoutPassword } = user.toObject();
+        res.send(userWithoutPassword);
+    } catch (error) {
+        res.status(500).send({ message: 'Error retrieving user' });
+    }
+};
 
-exports.updateUser = async(req,res) => {
-    console.log('updateUser Method');
-}
 
-exports.deleteUser = async(req,res) => {
-    console.log('deleteUser');
-}
+exports.updateUser = async (req, res) => {
+    try {
+        // Using { new: true } option to return the document after update
+        const user = await User.findByIdAndUpdate(req.params.userId, req.body, { new: true });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(user);
+    } catch (error) {
+        res.status(500).send({ message: 'Error updating user' });
+    }
+};
+
+
+exports.deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.userId);
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send({ message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).send({ message: 'Error deleting user' });
+    }
+};
+
 
