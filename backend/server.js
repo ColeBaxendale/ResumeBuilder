@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -9,7 +8,8 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const User = require('./models/user');
-
+const APP_URL = process.env.APP_URL;
+// Removed GOOGLE_URL and APP_URL since they're not used in a typical OAuth setup as initially described
 const app = express();
 
 app.use(cors());
@@ -31,26 +31,25 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-    passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/auth/google/callback"
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        const existingUser = await User.findOne({ googleId: profile.id });
-        if (existingUser) {
-          return done(null, existingUser);
-        }
-        const newUser = new User({
-          googleId: profile.id,
-          email: profile.emails[0].value,
-          
-        });
-        await newUser.save();
-        done(null, newUser);
-      }
-    ));
-    
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/auth/google/callback"
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    const existingUser = await User.findOne({ googleId: profile.id });
+    if (existingUser) {
+      return done(null, existingUser);
+    }
+    const newUser = new User({
+      googleId: profile.id,
+      email: profile.emails[0].value,
+      
+    });
+    await newUser.save();
+    done(null, newUser);
+  }
+));
 
 // Routes for Google OAuth
 app.get('/auth/google',
@@ -77,10 +76,7 @@ passport.deserializeUser(async (googleId, done) => {
     }
 });
 
-
-
-
-app.use('/api/users', userRoutes);
+app.use(APP_URL, userRoutes); 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
