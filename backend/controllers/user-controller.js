@@ -44,7 +44,7 @@ Each function is responsible for a specific task outlined below:
                 @param {headers}
                 req.headers(JWT TOKEN)
             200 @returns(User object without password) 
-            403 @returns("Unauthorized")
+            403 @returns("Forbidden")
             404 @returns("User not found") 
             500 @returns("Error retrieving user") 
 
@@ -63,7 +63,7 @@ Each function is responsible for a specific task outlined below:
             400 @returns("New password must be different than old")
             400 @returns("Please provide old password and new.")
             400 @returns("Current password is incorrect")
-            403 @returns("Unauthorized")
+            403 @returns("Forbidden")
             404 @returns("User not found") 
             500 @returns("Error updating user.") 
 
@@ -75,7 +75,7 @@ Each function is responsible for a specific task outlined below:
                 @param {headers}
                 req.headers(JWT TOKEN)
             200 @returns("User deleted successfully") 
-            403 @returns("Unauthorized")
+            403 @returns("Forbidden")
             404 @returns("User not found") 
             500 @returns("Error deleting user.") 
 
