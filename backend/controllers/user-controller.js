@@ -12,8 +12,13 @@ Responsible for user account creation, login, read, update, and delete.
        ~ Function to create a new user account
             @route POST /api/users/register
             @access Public
+                @param {string} req.body.email
+                @param {string} req.body.password
                 req.body(email, password)
-        (Return user_id & user.email)
+            201 @returns(user_id & user.email) 
+            409 @returns("User already exists with this email.") 
+            500 @returns("Failed to register user.") 
+
 
     - Login with correct user credintals
         ~ Function to login to a user's account
@@ -134,7 +139,7 @@ exports.updateUser = async (req, res) => {
         } else{
             return res.status(400).send({ message: "Please provide old password and new." });
         }
-        
+
         if (infoChanged) {
             await user.save(); // Save changes, triggers the pre-save hook for password hashing if it's been changed
             const userResponse = _.omit(user.toObject(), ['password']);
