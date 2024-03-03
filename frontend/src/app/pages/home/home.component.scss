@@ -1,0 +1,92 @@
+.section {
+    color: #a0aec0; // TailwindCSS gray-400
+    background-color: #1a202c; // TailwindCSS gray-900
+}
+
+.container {
+    padding: 6rem 1.25rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.image-container {
+    flex-basis: 100%;
+    padding-right: 80px;
+    margin-bottom: 1rem;
+    @media (min-width: 1024px) { // TailwindCSS lg breakpoint
+        flex-basis: 50%;
+        margin-bottom: 0;
+    }
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.feature-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.content-container {
+    flex-basis: 100%;
+    @media (min-width: 1024px) {
+        flex-basis: 50%;
+        padding-left: 1.25rem;
+    }
+}
+
+.feature {
+    margin-bottom: 3.5rem;
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.icon-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background-color: #2d3748; // TailwindCSS gray-800
+    color: #667eea; // TailwindCSS indigo-400
+    margin-bottom: 1.25rem;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.feature-content {
+    text-align: center;
+    @media (min-width: 1024px) {
+        text-align: left;
+    }
+}
+
+.title {
+    color: #ffffff;
+    font-size: 1.125rem; // title-font
+    margin-bottom: 0.75rem;
+}
+
+.description {
+    margin-bottom: 1.25rem;
+}
+
+.action-link {
+    display: inline-flex;
+    align-items: center;
+    color: #667eea; // TailwindCSS indigo-400
+    text-decoration: none;
+}
+
+.action-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 0.5rem;
+}
